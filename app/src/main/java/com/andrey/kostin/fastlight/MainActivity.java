@@ -14,8 +14,6 @@ import java.util.List;
 import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -36,9 +34,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     SurfaceView preview;//Обязательным условием при работе с камерой является создание окна предпросмотра (preview)
     SurfaceHolder surfHold; //переменная для холдера камеры. работа с preview ведется не напрямую, а через посредника – SurfaceHolder (surfholder) Именно с этим объектом умеет работать Camera. surfholder будет сообщать нам о том, что surface готов к работе, изменен или более недоступен.
                             //Camera берет holder и с его помощью выводит изображение на preview.
-
-    WakeLock nosleep; //переменная для функции запрета засыпания смартфона
-    PowerManager power; //переменная для передачи переменной nosleep возможности управления питанием
     private CoordinatorLayout coord;
     Snackbar snackbar;//переменная для снекбара
     Toolbar toolbar;  //переменная для тулбара
@@ -52,21 +47,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             snackbar=Snackbar.make(coord, "Camera is missing", Snackbar.LENGTH_LONG);
             snackbar.show();
 
-            // Use the screen as a flashlight (next best thing)
+            // Используем экран как вспышку
             layout.setBackgroundColor(COLOR_WHITE);
             return;
         }
         lightOn = true;
         Parameters parameters = mCamera.getParameters();
         if (parameters == null) {
-            // Use the screen as a flashlight (next best thing)
+            // Используем экран как вспышку
             layout.setBackgroundColor(COLOR_WHITE);
             return;
         }
         List<String> flashModes = parameters.getSupportedFlashModes();
         // Check if camera flash exists
         if (flashModes == null) {
-            // Use the screen as a flashlight (next best thing)
+            // Используем экран как вспышку
             layout.setBackgroundColor(COLOR_WHITE);
             return;
         }
@@ -79,11 +74,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 parameters.setFlashMode(Parameters.FLASH_MODE_TORCH);
                 mCamera.setParameters(parameters);
                 layout.setBackgroundColor(COLOR_LIGHT);
-                nosleepON();//здесь запрещаем смартфону засыпать - устанавливаем wakelock
+                //nosleepON();//здесь запрещаем смартфону засыпать - устанавливаем wakelock
             } else {
                 snackbar=Snackbar.make(coord, "Torch mode is not support", Snackbar.LENGTH_LONG);
                 snackbar.show();
-                // Use the screen as a flashlight (next best thing)
+                // Используем экран как вспышку
                 layout.setBackgroundColor(COLOR_WHITE);
                 Log.d(TAG, "FLASH_MODE_TORCH not supported");
             }
@@ -110,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (flashModes.contains(Parameters.FLASH_MODE_OFF)) {
                     parameters.setFlashMode(Parameters.FLASH_MODE_OFF);
                     mCamera.setParameters(parameters);
-                    nosleepOFF();//отключаем запрет на засыпание смартфона - снимаем wakelock
+                    //nosleepOFF();//отключаем запрет на засыпание смартфона - снимаем wakelock
                 } else {
                     Log.d(TAG, "FLASH_MODE_OFF not supported");
                 }
@@ -118,12 +113,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void startPreview() {
-        if (!previewOn && mCamera != null) {
-            mCamera.startPreview();//Чтобы включить отображение preview, вызываем
-            previewOn = true;
-        }
-    }
 
     private void stopPreview() {
         if (previewOn && mCamera != null) {
@@ -131,18 +120,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             previewOn = false;
         }
     }
-
-    private void nosleepON() {//метод запрещающий смартфону засыпать - устанавливаем wakelock
-        if (nosleep == null) {// если переменная nosleep пуста,то:
-            power = (PowerManager) getSystemService(Context.POWER_SERVICE);                 // привязываем к переменной power управление системным сервисом менеджер питания
-            nosleep = power.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"PLEASE_DONT_SLEEP");}  // заносим в nosleep параметр управления питанием "CPU не засыпать"
-        nosleep.acquire();//активируем wakelock запрет засыпания
-    }
-
-    private void nosleepOFF() {//метод снимающий запрет засыпания смартфона - снимаем wakelock
-        if (nosleep != null)  nosleep.release();  //если переменная уплавляющая питанием nosleep не пуста то снять все wakelock блокировки засыпания
-    }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -160,24 +137,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             surfHold.addCallback(this);//привязываем сообщения о состоянии сюрфейса превью
             //surfHold.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);//настройка типа нужна только для android версии ниже 3.0
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//отключаем засыпание экрана не используя wakelock
-  }
-
-    @Override
-    public void onStart() {//метод выполняется после ОнКрейт перед ОнРезюме - привязка к открытию камеры
-        super.onStart();
-        if (mCamera == null) {             //если камера не привязана к переменной то:
-            try {mCamera = Camera.open();  //привязываем к переменной открытую камеру.
-            } catch (Exception e) {Log.d(TAG, "Camera.open() failed: " + e.getMessage());}
-        }
-        startPreview();
-        //turnLightOn();  //включаем вспышку
     }
 
     @Override
     public void onResume() {
-        super.onResume();
-        turnLightOn(); //включаем вспышку
-        Log.d(TAG, "onResume");
+            super.onResume();
+            if (mCamera == null) {             //если камера не привязана к переменной то:
+                try {mCamera = Camera.open();}  //привязываем к переменной открытую камеру.
+                catch (Exception e) {Log.d(TAG, "Camera.open() failed: " + e.getMessage());}
+                             }
+            if (!previewOn && mCamera != null) {
+                mCamera.startPreview();//Чтобы включить отображение preview, вызываем startPreview
+                previewOn = true;
+                }
+            turnLightOn(); //включаем вспышку
+            Log.d(TAG, "onResume");
     }
 
     @Override
@@ -201,18 +175,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     @Override
-    public void surfaceChanged(SurfaceHolder holder, int I, int J, int K) {
-        Log.d(TAG, "surfaceChanged");
-    }
+    public void surfaceChanged(SurfaceHolder holder, int I, int J, int K) {Log.d(TAG, "surfaceChanged");}
 
     @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        Log.d(TAG, "surfaceCreated");
-        try {
-    mCamera.setPreviewDisplay(holder);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void surfaceCreated(SurfaceHolder holder) {Log.d(TAG, "surfaceCreated");
+        try {mCamera.setPreviewDisplay(holder);} catch (IOException e) {e.printStackTrace();}
     }
 
     @Override
@@ -223,23 +190,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
+        if (id == R.id.action_settings) {return true;}
         return super.onOptionsItemSelected(item);
     }
 
@@ -251,3 +209,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             default:break;   }
     }
 }
+
+/*
+//import android.os.PowerManager;
+//import android.os.PowerManager.WakeLock;
+//    WakeLock nosleep; //переменная для функции запрета засыпания смартфона
+//    PowerManager power; //переменная для передачи переменной nosleep возможности управления питанием
+ private void nosleepON() {//метод запрещающий смартфону засыпать - устанавливаем wakelock
+        if (nosleep == null) {// если переменная nosleep пуста,то:
+            power = (PowerManager) getSystemService(Context.POWER_SERVICE);                 // привязываем к переменной power управление системным сервисом менеджер питания
+            nosleep = power.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"PLEASE_DONT_SLEEP");}  // заносим в nosleep параметр управления питанием "CPU не засыпать"
+        nosleep.acquire();//активируем wakelock запрет засыпания
+    }
+
+    private void nosleepOFF() {//метод снимающий запрет засыпания смартфона - снимаем wakelock
+        if (nosleep != null)  nosleep.release();  //если переменная уплавляющая питанием nosleep не пуста то снять все wakelock блокировки засыпания
+    }*/
