@@ -33,6 +33,7 @@
 
     <SurfaceView
         android:id="@+id/preview"
+        android:layout_gravity="bottom|left"
         android:layout_width="1dp"
         android:layout_height="1dp" />
 

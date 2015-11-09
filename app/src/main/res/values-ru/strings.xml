@@ -2,4 +2,10 @@
 <resources>
     <string name="app_name">Фонарик</string>
     <string name="action_settings">Настройки</string>
+    <string name="cameramiss">Сожалею, не могу найти вспышку</string>
+    <string name="usescreen">К сожалению не могу найти вспышку, буду использовать свет от экрана</string>
+    <string name="close_app">Закрыть приложение</string>
+    <string name="rate">Оцените приложение</string>
+    <string name="rate_full">Пожалуйста оцените этот фонарик на Google Play</string>
+    <string name="snacknotsupport">К сожалению режим фонарика не поддерживается</string>
 </resources>
