@@ -7,4 +7,7 @@
     <string name="rate_full">Please rate this flashlight on Google Play</string>
     <string name="snacknotsupport">Sorry, Torch mode of flash is not support</string>
     <string name="cameramiss">Sorry, i can not find a flash</string>
+    <string name="swON">FLASH</string>
+    <string name="swOFF">SCREEN</string>
+    <string name="swscreen">Screen</string>
 </resources>

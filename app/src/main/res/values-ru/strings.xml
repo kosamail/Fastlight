@@ -8,4 +8,7 @@
     <string name="rate">Оцените приложение</string>
     <string name="rate_full">Пожалуйста оцените этот фонарик на Google Play</string>
     <string name="snacknotsupport">К сожалению режим фонарика не поддерживается</string>
+    <string name="swON">ВСПЫШКА</string>
+    <string name="swOFF">ЭКРАН</string>
+    <string name="swscreen">Экран</string>
 </resources>
