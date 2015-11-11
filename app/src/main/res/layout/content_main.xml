@@ -14,14 +14,5 @@
     android:background="#455a64"
     android:id="@+id/fon">
 
-    <Switch
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/swscreen"
-        android:checked="false"
-        android:textOff="@string/swON"
-        android:textOn="@string/swOFF"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="38dp" />
+
 </RelativeLayout>

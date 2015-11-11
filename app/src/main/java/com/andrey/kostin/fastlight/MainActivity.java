@@ -1,6 +1,7 @@
 package com.andrey.kostin.fastlight;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -54,14 +55,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+            setContentView(R.layout.main);
             toolbar = (Toolbar) findViewById(R.id.toolbar); //привязываем переменную к тулбару
             setSupportActionBar(toolbar);                   //устанавливает для тулбара поведение экшнбара
             fab = (FloatingActionButton) findViewById(R.id.fab);//привязываем переменную к флоатинг экшн буттон
             fab.setOnClickListener(this);                   //вешаем на кнопку обработку нажатия
             swscreen=(Switch)findViewById(R.id.swscreen);   //приязываем переменную к переключателю
             swscreen.setOnCheckedChangeListener(this);      //вешаем слушателя на переключатель
-
+            swscreen.setShadowLayer(2, 0, 0, Color.BLACK);
 
             layout=(RelativeLayout)findViewById(R.id.fon);  //привязываем лайот к переменной. в дальнейшем будем испольшовать для установки цвета фона
             coord=(CoordinatorLayout)findViewById(R.id.coord);//привязываем координатор лайот к переменной
@@ -231,12 +232,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         turnLightOff();         //гасим вспышку
         if (b) {                    //если выбран режим экран:
             screenASflash =true;    //устанавливаем переменную скринасфлеш в единицу. В дальшейшем эту переменную проверит функция по нажатию fab кнопки
-            snackbar=Snackbar.make(coord, "SCREEN AS TORCH", Snackbar.LENGTH_SHORT);//готовим сообщение снекбара что будем работать вместо вспышки с экраном
-            snackbar.show();           //выводим сообщение снекбара
+//            snackbar=Snackbar.make(coord, "SCREEN AS TORCH", Snackbar.LENGTH_SHORT);//готовим сообщение снекбара что будем работать вместо вспышки с экраном
+//            snackbar.show();           //выводим сообщение снекбара
         } else {
             screenASflash =false;   //устанавливаем переменную скринасфлеш в ноль. В дальшейшем эту переменную проверит функция по нажатию fab кнопки
-            snackbar=Snackbar.make(coord, "FLASH AS TORCH", Snackbar.LENGTH_SHORT);//готовим сообщение снекбара что будем работать вспышкой
-            snackbar.show();           //выводим сообщение снекбара
+//            snackbar=Snackbar.make(coord, "FLASH AS TORCH", Snackbar.LENGTH_SHORT);//готовим сообщение снекбара что будем работать вспышкой
+//            snackbar.show();           //выводим сообщение снекбара
         }
     }
 }
