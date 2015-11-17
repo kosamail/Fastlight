@@ -1,8 +1,10 @@
 package com.andrey.kostin.fastlight;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -12,6 +14,8 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 import android.hardware.Camera;
@@ -46,10 +50,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Toolbar toolbar;            //переменная для тулбара
     FloatingActionButton fab;   //переменная для работы с плавающей кнопкой
     RelativeLayout layout;      //переменная для работы с лайотом
+    WindowManager.LayoutParams layoutparams;
     Intent intent;              //переменная интента для вызова активити настроек
     private Switch swscreen;    //переменная для переключателя экран/вспышка
 
-
+    SharedPreferences sp;   //переменная для обращения к хранимым настройкам приложения
+    float sysbrigtness = 0;//переменная со значением системной яркости
+    double sysbrigtdouble;
 
 
     @Override
@@ -72,6 +79,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             surfHold.addCallback(this);//привязываем сообщения о состоянии сюрфейса превью
             //surfHold.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);//настройка типа нужна только для android версии ниже 3.0
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//отключаем засыпание экрана не используя wakelock
+
+       //Получаем системную яркость экрана
+            try {sysbrigtness = android.provider.Settings.System.getInt(getContentResolver(),android.provider.Settings.System.SCREEN_BRIGHTNESS); //берем в переменную текущую яркость экрана в формате от 1 до 255
+            Log.d(TAG,"Current Brighness is: "+ sysbrigtness);
+            sysbrigtness=sysbrigtness/255;                                                      //преобразуем полученное значение в диапазон от 0.01 до 1
+            BigDecimal bd = new BigDecimal(sysbrigtness).setScale(2, RoundingMode.HALF_EVEN);   //округляем до 2 знаков после запятой через использование формата Big Decimal
+            sysbrigtness = bd.floatValue();                                                     //назначаем в переменную яркости округленное до float значение
+            layoutparams = getWindow().getAttributes();                                         //берем текущие лайотпарамс, в дальнейшем будем их использовать в методах установки яркости
+            Log.d(TAG,"Current Brighness is: "+ sysbrigtness);
+            } catch (Exception e) {Log.d(TAG, "Exception on britness");}//ловим исключение при обращении к опросу яркости экрана
+
+      //Сохраняем в настройки значение системной яркости экрана
+            sp= PreferenceManager.getDefaultSharedPreferences(this);//получаем ШаредПреференсес которое работает с файлом настроек
+            //sp.edit().clear().commit();//команда очистки настроек (пока мне не нужна)
+            SharedPreferences.Editor ed = sp.edit();//чтобы редактировать данные, необходим объект Editor – получаем его из sp
+            ed.putString("brigtness", Float.toString(sysbrigtness) + "F");//В метод putString указываем наименование переменной  и значение взятое из переменной системной яркости
+            ed.apply();                             //Чтобы данные сохранились, необходимо выполнить apply.
+
             Log.d(TAG, "Metod onCreate Done");
     }
 
@@ -99,14 +124,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void turnLightOn() {                                        //метод для включения вспышки
         lightOn = true;                                                 //устанавливаем переменную лайтон(вспышка включена) в истину
-        if (screenASflash) {layout.setBackgroundColor(White);return;}    // Если переменная скринасфлеш установлена, значит вспышки нет и красим лайот в белый цвет и выходим из метода
+        if (screenASflash) {layout.setBackgroundColor(White); return;}    // Если переменная скринасфлеш установлена, значит вспышки нет и красим лайот в белый цвет и выходим из метода
         try{
         parameters = mCamera.getParameters();   //берем параметры камеры в переменную
         if (parameters == null) {layout.setBackgroundColor(White); return;}  //если параметры взять не удалось то значит с камерой проблемы, будем использовать всесто вспышки фон лайота. Красим фон и выходим из метода
         flashModes = parameters.getSupportedFlashModes();      //берем из параметров камеры список поддерживаемых режимов в строковый список flashmodes
         if (flashModes == null) {layout.setBackgroundColor(White); return;}  //если список режимов камеры пуст,то с камерой проблемы, будем использовать всесто вспышки фон лайота. Красим фон и выходим из метода
         flashMode = parameters.getFlashMode();  //берем текущий режим работы камеры в переменную
-        Log.d(TAG, "Used flash mode: " + flashMode+ ". All supported flash modes: " + flashModes);
+        Log.d(TAG, "Used flash mode: " + flashMode + ". All supported flash modes: " + flashModes);
         if (!Parameters.FLASH_MODE_TORCH.equals(flashMode)) {//если текущий режим вспышки не TORCH то:
             if (flashModes.contains(Parameters.FLASH_MODE_TORCH)) {//если среди поддерживаемых режимов ЕСТЬ TORCH то:
                 parameters.setFlashMode(Parameters.FLASH_MODE_TORCH);   //в переменную параметров устанавливаем режим вспышки TORCH
@@ -128,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!lightOn) return;                   //если переменная лайтон не установлена значит вспышка выключена, выходим из метода
             lightOn = false;                    //устанавливаем переменную лайтон в ноль, - признак вспышка выключена
             layout.setBackgroundColor(Dark);    //устанавливаем темный фон лайота
-            if (screenASflash ||(mCamera == null)) return;          //если переменная скринасфлеш установлена или переменная камеры пуста, значит вспышки нет и выходим из метода
+            if (screenASflash ||(mCamera == null))return;          //если переменная скринасфлеш установлена или переменная камеры пуста, значит вспышки нет и выходим из метода
             try {
             parameters = mCamera.getParameters();//берем параметры камеры
             if (parameters == null) return;     //если параметры пусты то выходим из метода
@@ -161,8 +186,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onDestroy() {   //метод перед уничтожением Активити
         super.onDestroy();
+        setSysBrigt();          //устанавливаем системную яркость экрана сохраненную в настройках
         try {
-        if(mCamera != null) {   //если камера не пуста
+            if(mCamera != null) {   //если камера не пуста
             turnLightOff();     //запускаем выключение вспышки
             if (previewOn && mCamera != null) { //если используется превью и камера не пуста
             mCamera.stopPreview();              //останавливаем превью
@@ -181,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {Log.d(TAG, "surfaceCreated");
-        try {mCamera.setPreviewDisplay(holder);} catch (IOException e) {e.printStackTrace();}
+        try {mCamera.setPreviewDisplay(holder);} catch (IOException e) {e.printStackTrace();}           // !!!!!здесь у меня ошибка прошлый раз была обратить внимание!!!
     }
 
     @Override
@@ -195,6 +221,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
+    public void setFullBrigt(){//Метод устанавливающий 100% яркость экрана
+        layoutparams.screenBrightness = 1F;                             //лайотпарамс скринбрайтнес задаем максимальное значение 1F
+        getWindow().setAttributes(layoutparams);                        //Задаем текущей активити атрибуты с измененной яркостью
+        //sysbrigtness=239;                                             //альтернативный способ задачи яркости. для начала присваиваем переменной максимальное значение
+        //android.provider.Settings.System.putInt(getContentResolver(), android.provider.Settings.System.SCREEN_BRIGHTNESS, (int)sysbrigtness);//альтернативный способ задачи яркости через андройд провайдер сеттингс.
+    }
+
+    public void setSysBrigt(){//Метод возвращающий системную яркость из памяти
+        sysbrigtness = Float.valueOf(sp.getString("brigtness", "0.7")); //считываем содержимое предыдущего результата из настроек
+        layoutparams.screenBrightness = sysbrigtness;                   //лайотпарамс скринбрайтнес задаем значение из переменной
+        getWindow().setAttributes(layoutparams);                        //Задаем текущей активити атрибуты с измененной яркостью
+        Log.d(TAG, "Brighness from Memory: " + sysbrigtness);
+        //android.provider.Settings.System.putInt(getContentResolver(), android.provider.Settings.System.SCREEN_BRIGHTNESS, (int) sysbrigtness); //альтернативный способ задачи яркости через андройд провайдер сеттингс.
+        //Log.d(TAG, "sysbrigtness on finish "+sysbrigtness);                                                                                   //только в андройдпровайдере sysbritness нужно использовать в диапазоне 0-255
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) { //Необходимая функция Обрабатываем нажатия на пункты меню
@@ -232,10 +275,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         turnLightOff();         //гасим вспышку
         if (b) {                    //если выбран режим экран:
             screenASflash =true;    //устанавливаем переменную скринасфлеш в единицу. В дальшейшем эту переменную проверит функция по нажатию fab кнопки
+            setFullBrigt();         //устанавливаем максимальную яркость экрана
 //            snackbar=Snackbar.make(coord, "SCREEN AS TORCH", Snackbar.LENGTH_SHORT);//готовим сообщение снекбара что будем работать вместо вспышки с экраном
 //            snackbar.show();           //выводим сообщение снекбара
         } else {
             screenASflash =false;   //устанавливаем переменную скринасфлеш в ноль. В дальшейшем эту переменную проверит функция по нажатию fab кнопки
+            setSysBrigt();          //устанавливаем системную яркость экрана сохраненную в настройках
 //            snackbar=Snackbar.make(coord, "FLASH AS TORCH", Snackbar.LENGTH_SHORT);//готовим сообщение снекбара что будем работать вспышкой
 //            snackbar.show();           //выводим сообщение снекбара
         }
