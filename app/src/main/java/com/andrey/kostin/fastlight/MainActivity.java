@@ -29,7 +29,7 @@ import android.widget.RelativeLayout;
 import android.widget.Switch;
 
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, SurfaceHolder.Callback, CompoundButton.OnCheckedChangeListener{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener{
 
     private static final String TAG = "MYLOG";      //переменная для таггироования логов
     private static final int Dark = 0xFF455A64;     //темный цвет фона
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     SharedPreferences sp;   //переменная для обращения к хранимым настройкам приложения
     float sysbrigtness = 0;//переменная со значением системной яркости
-    double sysbrigtdouble;
+
 
 
     @Override
@@ -76,7 +76,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             preview = (SurfaceView) this.findViewById(R.id.preview);//Обязательным условием при работе с камерой является создание окна предпросмотра (preview)
             surfHold = preview.getHolder();//берем холдер с превью
-            surfHold.addCallback(this);//привязываем сообщения о состоянии сюрфейса превью
+            //surfHold.addCallback(this);
+        //Далее привязываем сообщения о состоянии сурфейса(Каллбек) к mCamera.превью и стартуем превью
+            surfHold.addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceCreated(SurfaceHolder holder) {
+            try {mCamera.setPreviewDisplay(holder);mCamera.startPreview();} catch (Exception e) {e.printStackTrace();}  }
+            @Override
+            public void surfaceChanged(SurfaceHolder holder, int format,int width, int height) {}
+            @Override
+            public void surfaceDestroyed(SurfaceHolder holder) {}
+            });
+
             //surfHold.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);//настройка типа нужна только для android версии ниже 3.0
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//отключаем засыпание экрана не используя wakelock
 
@@ -112,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                      swscreen.setEnabled(false);//делаем переключатель неактивным, потому как выбрать вспышку мы однозначно не можем
                   //   snackbar=Snackbar.make(coord, R.string.usescreen, Snackbar.LENGTH_LONG);//готовим сообщение снекбара что будем работать вместо вспышки с экраном
                   //   snackbar.show();           //выводим сообщение снекбара
-                     Log.d(TAG, "We have error"+ e.getMessage());}}//пишем в лог возникшую ошибку
+                     Log.d(TAG, "Ошибка "+ e.getMessage());}}//пишем в лог возникшую ошибку
             if (!previewOn && mCamera != null) {//если превью пустое и камера не пуста:
                 mCamera.startPreview();         //вызываем startPreview чтобы включить отображение изображения с камеры в preview
                 previewOn = true;}               //устанавливаем переменную превьюОн в единицу - превью используется
@@ -122,53 +133,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    private void turnLightOn() {                                        //метод для включения вспышки
-        lightOn = true;                                                 //устанавливаем переменную лайтон(вспышка включена) в истину
-        if (screenASflash) {layout.setBackgroundColor(White); return;}    // Если переменная скринасфлеш установлена, значит вспышки нет и красим лайот в белый цвет и выходим из метода
+    private void turnLightOn() {     //Метод для включения вспышки
+        lightOn = true;                                                     //устанавливаем переменную лайтон(вспышка включена) в истину
+        if (screenASflash) {layout.setBackgroundColor(White); return;}      // Если переменная скринасфлеш установлена, значит вспышки нет и красим лайот в белый цвет и выходим из метода
         try{
-        parameters = mCamera.getParameters();   //берем параметры камеры в переменную
-        if (parameters == null) {layout.setBackgroundColor(White); return;}  //если параметры взять не удалось то значит с камерой проблемы, будем использовать всесто вспышки фон лайота. Красим фон и выходим из метода
-        flashModes = parameters.getSupportedFlashModes();      //берем из параметров камеры список поддерживаемых режимов в строковый список flashmodes
-        if (flashModes == null) {layout.setBackgroundColor(White); return;}  //если список режимов камеры пуст,то с камерой проблемы, будем использовать всесто вспышки фон лайота. Красим фон и выходим из метода
-        flashMode = parameters.getFlashMode();  //берем текущий режим работы камеры в переменную
-        Log.d(TAG, "Used flash mode: " + flashMode + ". All supported flash modes: " + flashModes);
-        if (!Parameters.FLASH_MODE_TORCH.equals(flashMode)) {//если текущий режим вспышки не TORCH то:
-            if (flashModes.contains(Parameters.FLASH_MODE_TORCH)) {//если среди поддерживаемых режимов ЕСТЬ TORCH то:
-                parameters.setFlashMode(Parameters.FLASH_MODE_TORCH);   //в переменную параметров устанавливаем режим вспышки TORCH
-                mCamera.setParameters(parameters);                      //ВКЛЮЧАЕМ ВСПЫШКУ УСТАНАВЛИВАЯ ПАРАМЕТР КАМЕРЫ FLASH_MODE_TORCH
-                Log.d(TAG, "Set FLASH_MODE_TORCH");
-                layout.setBackgroundColor(Light);                       //подкрашиваем фон лайота светлым
-                //nosleepON();                                          //здесь запрещаем смартфону засыпать - устанавливаем wakelock
-            } else  {                                                   //если среди поддерживаемых режиимов TORCH НЕТ то:
+        parameters = mCamera.getParameters();                               //берем параметры камеры в переменную
+        if (parameters == null) {layout.setBackgroundColor(White); return;} //если параметры взять не удалось то значит с камерой проблемы, будем использовать всесто вспышки фон лайота. Красим фон и выходим из метода
+        flashModes = parameters.getSupportedFlashModes();                   //берем из параметров камеры список поддерживаемых режимов в строковый список flashmodes
+        if (flashModes == null) {layout.setBackgroundColor(White); return;} //если список режимов камеры пуст,то с камерой проблемы, будем использовать всесто вспышки фон лайота. Красим фон и выходим из метода
+        flashMode = parameters.getFlashMode();                              //берем текущий режим работы камеры в переменную
+        Log.d(TAG, "Сейчас установлен флешмод: " + flashMode + " Поддерживаются флешмоды: " + flashModes);
+        if (!Parameters.FLASH_MODE_TORCH.equals(flashMode)) {               //если текущий режим вспышки не TORCH то:
+            if (flashModes.contains(Parameters.FLASH_MODE_TORCH)) {         //если среди поддерживаемых режимов ЕСТЬ TORCH то:
+                parameters.setFlashMode(Parameters.FLASH_MODE_TORCH);       //в переменную параметров устанавливаем режим вспышки TORCH
+                mCamera.setParameters(parameters);                          //ВКЛЮЧАЕМ ВСПЫШКУ УСТАНАВЛИВАЯ ПАРАМЕТР КАМЕРЫ FLASH_MODE_TORCH
+                Log.d(TAG, "Устанавливаем FLASH_MODE_TORCH");
+                layout.setBackgroundColor(Light);                           //подкрашиваем фон лайота светлым
+                //nosleepON();                                              //здесь запрещаем смартфону засыпать - устанавливаем wakelock
+            } else  {                                                       //если среди поддерживаемых режиимов TORCH НЕТ то:
                 snackbar=Snackbar.make(coord, R.string.snacknotsupport, Snackbar.LENGTH_LONG);//готовим снекбар с сообщением что режим TORCH не поддерживается
-                snackbar.show();                                        //показываем снекбар
-                layout.setBackgroundColor(White);                       //Красим фон лайота белым
-                Log.d(TAG, "FLASH_MODE_TORCH not supported");
+                snackbar.show();                                            //показываем снекбар
+                layout.setBackgroundColor(White);                           //Красим фон лайота белым
+                Log.d(TAG, "FLASH_MODE_TORCH не поддерживается");
             }
         }
     }catch(Exception e) { Log.d(TAG, "\n"+"Перехвачено исключение в методе turnLightOn: "+ e.getMessage()); }//отлавливаем исключение в методе turnLightOn
     }
 
-    private void turnLightOff() {               //метод для выключения вспышки
-        if (!lightOn) return;                   //если переменная лайтон не установлена значит вспышка выключена, выходим из метода
-            lightOn = false;                    //устанавливаем переменную лайтон в ноль, - признак вспышка выключена
-            layout.setBackgroundColor(Dark);    //устанавливаем темный фон лайота
-            if (screenASflash ||(mCamera == null))return;          //если переменная скринасфлеш установлена или переменная камеры пуста, значит вспышки нет и выходим из метода
+    private void turnLightOff() {  //Метод для выключения вспышки
+        if (!lightOn) return;                                           //если переменная лайтон не установлена значит вспышка выключена, выходим из метода
+            lightOn = false;                                            //устанавливаем переменную лайтон в ноль, - признак вспышка выключена
+            layout.setBackgroundColor(Dark);                            //устанавливаем темный фон лайота
+            if (screenASflash ||(mCamera == null))return;               //если переменная скринасфлеш установлена или переменная камеры пуста, значит вспышки нет и выходим из метода
             try {
-            parameters = mCamera.getParameters();//берем параметры камеры
-            if (parameters == null) return;     //если параметры пусты то выходим из метода
-            //flashModes = parameters.getSupportedFlashModes();
-            flashMode = parameters.getFlashMode();//из параметров берем текущий режим
-//            if (flashModes == null) return;
-             if (!Parameters.FLASH_MODE_OFF.equals(flashMode)) {
-                // Turn off the flash
-                if (flashModes.contains(Parameters.FLASH_MODE_OFF)) {
-                    parameters.setFlashMode(Parameters.FLASH_MODE_OFF);
-                    mCamera.setParameters(parameters);
-                    Log.d(TAG, "Set FLASH_MODE_OFF ");
+            parameters = mCamera.getParameters();                       //берем параметры камеры
+            if (parameters == null) return;                             //если параметры пусты то выходим из метода
+            flashMode = parameters.getFlashMode();                      //из параметров берем текущий режим
+            if (!Parameters.FLASH_MODE_OFF.equals(flashMode)) {         //Есди параметр вспышки не равен "Выключено" то:
+                if (flashModes.contains(Parameters.FLASH_MODE_OFF)) {   //Если в списке допустимых параметров flashmodes есть параметр ФлешМодОФФ то:
+                    parameters.setFlashMode(Parameters.FLASH_MODE_OFF); //присваиваем параметр  ФлешМодОфф в параметры
+                    mCamera.setParameters(parameters);                  //устанавливаем камере параметры с выключенной вспышкой - ВЫКЛЮЧАЕМ ВСПЫШКУ
+                    Log.d(TAG, "Устанавливаем FLASH_MODE_OFF ");
                     //nosleepOFF();//отключаем запрет на засыпание смартфона - снимаем wakelock
                 } else {
-                    Log.d(TAG, "FLASH_MODE_OFF not supported");
+                    Log.d(TAG, "FLASH_MODE_OFF не поддерживается");
                 }
             }
 
@@ -199,22 +207,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d(TAG, "Method onDestroy finish");
         }catch(Exception e) { Log.d(TAG, "\n"+"Перехвачено исключение в методе onDestroy: "+ e.getMessage()); }//отлавливаем исключение в методе onDestroy
     }
-
-
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int I, int J, int K) {Log.d(TAG, "surfaceChanged");}
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {Log.d(TAG, "surfaceCreated");
-        try {mCamera.setPreviewDisplay(holder);} catch (IOException e) {e.printStackTrace();}           // !!!!!здесь у меня ошибка прошлый раз была обратить внимание!!!
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.d(TAG, "surfaceDestroyed");
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {       //Необходимая функция Создает меню из файла мейнменю.хмл
