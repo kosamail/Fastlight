@@ -3,6 +3,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 //import android.preference.ListPreference;
+import android.preference.CheckBoxPreference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 
@@ -12,19 +13,15 @@ public class PrefActivity extends PreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         PreferenceScreen rootScreen = getPreferenceManager().createPreferenceScreen(this);// создаем экран
-        setPreferenceScreen(rootScreen);        // говорим Activity, что rootScreen - корневой
+        setPreferenceScreen(rootScreen);                        // сообщаем активити что rootScreen - корневой
 
-/*        //создаем итем листпреференс для выбора количества знаков после запятой
-        ListPreference listdecimal = new ListPreference(this);
-        listdecimal.setKey("floatnumber");
-        listdecimal.setTitle(R.string.decimal);
-        listdecimal.setSummary(R.string.decimal_full);
-        listdecimal.setDefaultValue("6");
-        listdecimal.setEntries(R.array.listItems);
-        listdecimal.setEntryValues(R.array.listValues);
-        rootScreen.addPreference(listdecimal);//добавляем итем
+/*        CheckBoxPreference check1 = new CheckBoxPreference(this);   //создаем новый чекбокс - Я написал эту функцию для выбора источника света при загрузке, но пока не использую
+        check1.setKey("check1");                                    //задаем ключ для сохранения-чтения настройки
+        check1.setTitle(R.string.check1title);                      //задаем заголовок настройки
+        check1.setSummary(R.string.check1summary);                  //задаем расшириное описание настройки
+        rootScreen.addPreference(check1);                           //добавляем чекбокс на корневой экран*/
 
-        //создаем итем листпреференс для выбора шрифта
+/*      //создаем итем листпреференс для выбора шрифта
         ListPreference listfont = new ListPreference(this);
         listfont.setKey("fontstyle");
         listfont.setTitle(R.string.fontstyle);

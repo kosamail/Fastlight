@@ -11,4 +11,6 @@
     <string name="swON">ВСПЫШКА</string>
     <string name="swOFF">ЭКРАН</string>
     <string name="swscreen">Экран</string>
+    <string name="check1title">Светить экраном</string>
+    <string name="check1summary">Светить экраном вместо вспышки при старте приложения</string>
 </resources>

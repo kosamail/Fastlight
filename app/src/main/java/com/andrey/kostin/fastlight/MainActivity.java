@@ -13,7 +13,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
@@ -55,8 +54,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Switch swscreen;    //переменная для переключателя экран/вспышка
 
     SharedPreferences sp;   //переменная для обращения к хранимым настройкам приложения
-    float sysbrigtness = 0;//переменная со значением системной яркости
-
+    float sysbrigtness = 0; //переменная со значением системной яркости
+    Boolean check1=false;   //переменная для выбора настройки экрана как источника света при старте
 
 
     @Override
@@ -108,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ed.putString("brigtness", Float.toString(sysbrigtness) + "F");//В метод putString указываем наименование переменной  и значение взятое из переменной системной яркости
             ed.apply();                             //Чтобы данные сохранились, необходимо выполнить apply.
 
+            //check1 = sp.getBoolean("check1", false);// берем значение переменной выбора источника света по умолчанию из настроек - Я написал функцию выбора источника света при загрузке но пока считаю ее непопулярной
             Log.d(TAG, "Metod onCreate Done");
     }
 
@@ -117,13 +117,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try{
             if (mCamera == null) {              //если камера не привязана к переменной то:
                 try {mCamera = Camera.open();   //привязываем к переменной открытую камеру.
-                     screenASflash =false;}      //переменная скринасфлеш устанавливаем в ноль - работаем с камерой
+                     screenASflash =false;      //переменная скринасфлеш устанавливаем в ноль - работаем с камерой
+                     if(!hasFlash()){           //если вспышки в смартфоне нет hasflash=0 то:
+                        screenASflash=true;            //установить переменною скринасфлеш в 1
+                        swscreen.setChecked(true);     //задать переключателю положение ЭКРАН
+                        swscreen.setEnabled(false);}   //делаем переключатель неактивным, потому как выбрать вспышку мы однозначно не можем
+                }
                 catch (Exception e) {           //если не получается привязаться к камере, то
                      screenASflash =true;        //переменная скринасфлеш в единицу - будем работать с экраном вместо камеры
+                     swscreen.setChecked(true);     //задать переключателю положение ЭКРАН
                      swscreen.setEnabled(false);//делаем переключатель неактивным, потому как выбрать вспышку мы однозначно не можем
                   //   snackbar=Snackbar.make(coord, R.string.usescreen, Snackbar.LENGTH_LONG);//готовим сообщение снекбара что будем работать вместо вспышки с экраном
                   //   snackbar.show();           //выводим сообщение снекбара
                      Log.d(TAG, "Ошибка "+ e.getMessage());}}//пишем в лог возникшую ошибку
+
+/*          //Опрос чекбокса настройки светить экраном при запуске - Я написал эту функцию, но считаю что она не будет популярна, поэтому закоментировано
+            if(check1){                          //если чекбокс настойки светить экраном при старте установлен, то
+                screenASflash=true;            //установить переменною скринасфлеш в 1
+                swscreen.setChecked(true);     //задать переключателю положение ЭКРАН
+                check1=false;}                   //сбросить переменную чек1 в ноль чтобы в следующих обращениях к онРезюм не переключаться в режим экрана
+*/
+
             if (!previewOn && mCamera != null) {//если превью пустое и камера не пуста:
                 mCamera.startPreview();         //вызываем startPreview чтобы включить отображение изображения с камеры в preview
                 previewOn = true;}               //устанавливаем переменную превьюОн в единицу - превью используется
@@ -131,6 +145,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }catch(Exception e) { Log.d(TAG, "\n"+"Перехвачено исключение в методе onResume: "+ e.getMessage()); }//отлавливаем исключение в методе onResume
             Log.d(TAG, "Metod onResume Done");
     }
+
+
+    public boolean hasFlash() {     //Функция возвращающая 1-если вспышка на смартфоне есть и 0-если вспышки нет
+        //if (mCamera == null) return false;
+        parameters = mCamera.getParameters();
+        if (parameters.getFlashMode() == null) return false;
+        flashModes = parameters.getSupportedFlashModes();
+        if (flashModes == null || flashModes.isEmpty() || flashModes.size() == 1 && flashModes.get(0).equals(Camera.Parameters.FLASH_MODE_OFF))return false;
+        return true;
+    }
+
+
 
 
     private void turnLightOn() {     //Метод для включения вспышки
@@ -151,8 +177,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 layout.setBackgroundColor(Light);                           //подкрашиваем фон лайота светлым
                 //nosleepON();                                              //здесь запрещаем смартфону засыпать - устанавливаем wakelock
             } else  {                                                       //если среди поддерживаемых режиимов TORCH НЕТ то:
-                snackbar=Snackbar.make(coord, R.string.snacknotsupport, Snackbar.LENGTH_LONG);//готовим снекбар с сообщением что режим TORCH не поддерживается
-                snackbar.show();                                            //показываем снекбар
+//                snackbar=Snackbar.make(coord, R.string.snacknotsupport, Snackbar.LENGTH_LONG);//готовим снекбар с сообщением что режим TORCH не поддерживается
+//                snackbar.show();                                            //показываем снекбар
                 layout.setBackgroundColor(White);                           //Красим фон лайота белым
                 Log.d(TAG, "FLASH_MODE_TORCH не поддерживается");
             }
