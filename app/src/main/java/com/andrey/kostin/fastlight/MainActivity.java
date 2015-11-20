@@ -121,12 +121,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                      if(!hasFlash()){           //если вспышки в смартфоне нет hasflash=0 то:
                         screenASflash=true;            //установить переменною скринасфлеш в 1
                         swscreen.setChecked(true);     //задать переключателю положение ЭКРАН
-                        swscreen.setEnabled(false);}   //делаем переключатель неактивным, потому как выбрать вспышку мы однозначно не можем
+                      //swscreen.setEnabled(false);    //делаем переключатель неактивным
+                        swscreen.setVisibility(View.INVISIBLE);}//делаем переключатель невидимым, потому как выбрать вспышку мы однозначно не можем
                 }
                 catch (Exception e) {           //если не получается привязаться к камере, то
                      screenASflash =true;        //переменная скринасфлеш в единицу - будем работать с экраном вместо камеры
                      swscreen.setChecked(true);     //задать переключателю положение ЭКРАН
-                     swscreen.setEnabled(false);//делаем переключатель неактивным, потому как выбрать вспышку мы однозначно не можем
+                   //swscreen.setEnabled(false);//делаем переключатель неактивным
+                     swscreen.setVisibility(View.INVISIBLE);//делаем переключатель невидимым, потому как выбрать вспышку мы однозначно не можем
                   //   snackbar=Snackbar.make(coord, R.string.usescreen, Snackbar.LENGTH_LONG);//готовим сообщение снекбара что будем работать вместо вспышки с экраном
                   //   snackbar.show();           //выводим сообщение снекбара
                      Log.d(TAG, "Ошибка "+ e.getMessage());}}//пишем в лог возникшую ошибку
