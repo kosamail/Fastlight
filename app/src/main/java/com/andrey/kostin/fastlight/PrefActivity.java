@@ -2,8 +2,6 @@ package com.andrey.kostin.fastlight;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-//import android.preference.ListPreference;
-import android.preference.CheckBoxPreference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 
@@ -14,22 +12,6 @@ public class PrefActivity extends PreferenceActivity {
         super.onCreate(savedInstanceState);
         PreferenceScreen rootScreen = getPreferenceManager().createPreferenceScreen(this);// создаем экран
         setPreferenceScreen(rootScreen);                        // сообщаем активити что rootScreen - корневой
-
-/*        CheckBoxPreference check1 = new CheckBoxPreference(this);   //создаем новый чекбокс - Я написал эту функцию для выбора источника света при загрузке, но пока не использую
-        check1.setKey("check1");                                    //задаем ключ для сохранения-чтения настройки
-        check1.setTitle(R.string.check1title);                      //задаем заголовок настройки
-        check1.setSummary(R.string.check1summary);                  //задаем расшириное описание настройки
-        rootScreen.addPreference(check1);                           //добавляем чекбокс на корневой экран*/
-
-/*      //создаем итем листпреференс для выбора шрифта
-        ListPreference listfont = new ListPreference(this);
-        listfont.setKey("fontstyle");
-        listfont.setTitle(R.string.fontstyle);
-        listfont.setSummary(getString(R.string.fontstyle_full));
-        listfont.setDefaultValue("zekton.ttf");
-        listfont.setEntries(R.array.fontItems);
-        listfont.setEntryValues(R.array.fontValues);
-        rootScreen.addPreference(listfont);//добавляем итем*/
 
         //создаем итем ссылку на страничку программы в гугл плей
         PreferenceScreen intentPref = getPreferenceManager().createPreferenceScreen(this);

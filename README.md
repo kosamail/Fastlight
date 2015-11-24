@@ -1,2 +1,1 @@
-Fastlight
 Flashlight app for Android 4.03+ This project is a flashlight for Android-based smartphones. It uses hardware camera flash of smartphone or the brightness of the screen as a torch. The original application is located at: https://play.google.com/store/apps/details?id=com.andrey.kostin.fastlight

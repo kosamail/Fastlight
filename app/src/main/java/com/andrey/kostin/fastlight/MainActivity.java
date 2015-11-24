@@ -7,16 +7,13 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.util.Log;
@@ -26,7 +23,6 @@ import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
-
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener{
 
@@ -45,8 +41,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     List<String> flashModes;    //Переменная список поддерживаемых режимов вспышки
     String flashMode;           //переменная для текущего режима вспышки и установки режимов
     private CoordinatorLayout coord;//переменная для привязки и координаторлайоту
-    Snackbar snackbar;          //переменная для снекбара
-    Toolbar toolbar;            //переменная для тулбара
     FloatingActionButton fab;   //переменная для работы с плавающей кнопкой
     RelativeLayout layout;      //переменная для работы с лайотом
     WindowManager.LayoutParams layoutparams;
@@ -55,15 +49,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     SharedPreferences sp;   //переменная для обращения к хранимым настройкам приложения
     float sysbrigtness = 0; //переменная со значением системной яркости
-    Boolean check1=false;   //переменная для выбора настройки экрана как источника света при старте
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.main);
-            toolbar = (Toolbar) findViewById(R.id.toolbar); //привязываем переменную к тулбару
-            setSupportActionBar(toolbar);                   //устанавливает для тулбара поведение экшнбара
             fab = (FloatingActionButton) findViewById(R.id.fab);//привязываем переменную к флоатинг экшн буттон
             fab.setOnClickListener(this);                   //вешаем на кнопку обработку нажатия
             swscreen=(Switch)findViewById(R.id.swscreen);   //приязываем переменную к переключателю
@@ -106,8 +97,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             SharedPreferences.Editor ed = sp.edit();//чтобы редактировать данные, необходим объект Editor – получаем его из sp
             ed.putString("brigtness", Float.toString(sysbrigtness) + "F");//В метод putString указываем наименование переменной  и значение взятое из переменной системной яркости
             ed.apply();                             //Чтобы данные сохранились, необходимо выполнить apply.
-
-            //check1 = sp.getBoolean("check1", false);// берем значение переменной выбора источника света по умолчанию из настроек - Я написал функцию выбора источника света при загрузке но пока считаю ее непопулярной
             Log.d(TAG, "Metod onCreate Done");
     }
 
@@ -129,16 +118,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                      swscreen.setChecked(true);     //задать переключателю положение ЭКРАН
                    //swscreen.setEnabled(false);//делаем переключатель неактивным
                      swscreen.setVisibility(View.INVISIBLE);//делаем переключатель невидимым, потому как выбрать вспышку мы однозначно не можем
-                  //   snackbar=Snackbar.make(coord, R.string.usescreen, Snackbar.LENGTH_LONG);//готовим сообщение снекбара что будем работать вместо вспышки с экраном
-                  //   snackbar.show();           //выводим сообщение снекбара
                      Log.d(TAG, "Ошибка "+ e.getMessage());}}//пишем в лог возникшую ошибку
-
-/*          //Опрос чекбокса настройки светить экраном при запуске - Я написал эту функцию, но считаю что она не будет популярна, поэтому закоментировано
-            if(check1){                          //если чекбокс настойки светить экраном при старте установлен, то
-                screenASflash=true;            //установить переменною скринасфлеш в 1
-                swscreen.setChecked(true);     //задать переключателю положение ЭКРАН
-                check1=false;}                   //сбросить переменную чек1 в ноль чтобы в следующих обращениях к онРезюм не переключаться в режим экрана
-*/
 
             if (!previewOn && mCamera != null) {//если превью пустое и камера не пуста:
                 mCamera.startPreview();         //вызываем startPreview чтобы включить отображение изображения с камеры в preview
@@ -179,8 +159,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 layout.setBackgroundColor(Light);                           //подкрашиваем фон лайота светлым
                 //nosleepON();                                              //здесь запрещаем смартфону засыпать - устанавливаем wakelock
             } else  {                                                       //если среди поддерживаемых режиимов TORCH НЕТ то:
-//                snackbar=Snackbar.make(coord, R.string.snacknotsupport, Snackbar.LENGTH_LONG);//готовим снекбар с сообщением что режим TORCH не поддерживается
-//                snackbar.show();                                            //показываем снекбар
                 layout.setBackgroundColor(White);                           //Красим фон лайота белым
                 Log.d(TAG, "FLASH_MODE_TORCH не поддерживается");
             }
@@ -296,13 +274,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (b) {                    //если выбран режим экран:
             screenASflash =true;    //устанавливаем переменную скринасфлеш в единицу. В дальшейшем эту переменную проверит функция по нажатию fab кнопки
             setFullBrigt();         //устанавливаем максимальную яркость экрана
-//            snackbar=Snackbar.make(coord, "SCREEN AS TORCH", Snackbar.LENGTH_SHORT);//готовим сообщение снекбара что будем работать вместо вспышки с экраном
-//            snackbar.show();           //выводим сообщение снекбара
         } else {
             screenASflash =false;   //устанавливаем переменную скринасфлеш в ноль. В дальшейшем эту переменную проверит функция по нажатию fab кнопки
             setSysBrigt();          //устанавливаем системную яркость экрана сохраненную в настройках
-//            snackbar=Snackbar.make(coord, "FLASH AS TORCH", Snackbar.LENGTH_SHORT);//готовим сообщение снекбара что будем работать вспышкой
-//            snackbar.show();           //выводим сообщение снекбара
         }
     }
 }
