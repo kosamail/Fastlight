@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+//import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -27,8 +28,8 @@ import android.widget.Switch;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener{
 
     private static final String TAG = "MYLOG";      //переменная для таггироования логов
-    private static final int Dark = 0xFF455A64;     //темный цвет фона
-    private static final int Light = 0xFF94A4AC;    //светлый цвет фона
+    int Dark = 0xFF455A64;     //темный цвет фона
+    int Light = 0xFF94A4AC;    //светлый цвет фона
     private static final int White = 0xFFFFFFFF;    //белый цвет фона
     private Camera mCamera;     //переменная для работы с камерой
     Parameters parameters;      //переменная для хранения параметров камеры
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     SharedPreferences sp;   //переменная для обращения к хранимым настройкам приложения
     float sysbrigtness = 0; //переменная со значением системной яркости
-
+    float hsv[];            //переменная для получения светлого цвета фона на основе имеющегося темного цвета из настроек
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -98,12 +99,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ed.putString("brigtness", Float.toString(sysbrigtness) + "F");//В метод putString указываем наименование переменной  и значение взятое из переменной системной яркости
             ed.apply();                             //Чтобы данные сохранились, необходимо выполнить apply.
             Log.d(TAG, "Metod onCreate Done");
+
+            hsv = new float[3];//инициализируем переменную для вычисления светлого цвета фона, в дальнейшем продолжим работу в онрезюм
     }
 
     @Override
     public void onResume() {
             super.onResume();
         try{
+
+      //Задаем темный и светлый цвета фона
+            if(sp.getBoolean("checkcolor",false)) { //если в преференсес установлен чекбокс для выбора пользовательского цвета фона, то:
+                Dark = sp.getInt("foncolor", R.color.colordark);//берем в переменную цвет фона из настроек. Использовать будем позже в функции турнлайтофф
+                Color.RGBToHSV(Color.red(Dark), Color.green(Dark), Color.blue(Dark), hsv);//на основе заданного цвета фона будем получать светлый - сейчас преобразуем РГБ в ХСВ для осветления
+                hsv[1] = 0.1F;                      //Осветляем цвет путем уменьшения сатурейшн
+                Light = Color.HSVToColor(hsv);      //получаем осветленный цвет в переменную Лайт
+            } else{ Dark = 0xFF455A64;  Light = 0xFF94A4AC;}
+//                layout.setBackgroundColor(Dark);                            //устанавливаем фон лайота
+
             if (mCamera == null) {              //если камера не привязана к переменной то:
                 try {mCamera = Camera.open();   //привязываем к переменной открытую камеру.
                      screenASflash =false;      //переменная скринасфлеш устанавливаем в ноль - работаем с камерой
@@ -111,8 +124,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         screenASflash=true;            //установить переменною скринасфлеш в 1
                         swscreen.setChecked(true);     //задать переключателю положение ЭКРАН
                       //swscreen.setEnabled(false);    //делаем переключатель неактивным
-                        swscreen.setVisibility(View.INVISIBLE);}//делаем переключатель невидимым, потому как выбрать вспышку мы однозначно не можем
-                }
+                        swscreen.setVisibility(View.INVISIBLE); }//делаем переключатель невидимым, потому как выбрать вспышку мы однозначно не можем
+                 }
                 catch (Exception e) {           //если не получается привязаться к камере, то
                      screenASflash =true;        //переменная скринасфлеш в единицу - будем работать с экраном вместо камеры
                      swscreen.setChecked(true);     //задать переключателю положение ЭКРАН
@@ -124,8 +137,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mCamera.startPreview();         //вызываем startPreview чтобы включить отображение изображения с камеры в preview
                 previewOn = true;}               //устанавливаем переменную превьюОн в единицу - превью используется
             turnLightOn(); //включаем вспышку
-        }catch(Exception e) { Log.d(TAG, "\n"+"Перехвачено исключение в методе onResume: "+ e.getMessage()); }//отлавливаем исключение в методе onResume
-            Log.d(TAG, "Metod onResume Done");
+        }catch(Exception e) { Log.d(TAG, "\n"+"Перехвачено исключение в методе onResume: " + e.getMessage());
+        }//отлавливаем исключение в методе onResume
+        Log.d(TAG, "Metod onResume Done");
     }
 
 
@@ -169,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void turnLightOff() {  //Метод для выключения вспышки
         if (!lightOn) return;                                           //если переменная лайтон не установлена значит вспышка выключена, выходим из метода
             lightOn = false;                                            //устанавливаем переменную лайтон в ноль, - признак вспышка выключена
-            layout.setBackgroundColor(Dark);                            //устанавливаем темный фон лайота
+            layout.setBackgroundColor(Dark);                            //устанавливаем фон лайота
             if (screenASflash ||(mCamera == null))return;               //если переменная скринасфлеш установлена или переменная камеры пуста, значит вспышки нет и выходим из метода
             try {
             parameters = mCamera.getParameters();                       //берем параметры камеры

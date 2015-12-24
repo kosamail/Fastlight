@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:key="checkcolor"
+        android:title="@string/customcolor"
+        android:summary="@string/customcolorfull"
+        android:checked="false">
+    </CheckBoxPreference>
+
+    <net.margaritov.preference.colorpicker.ColorPickerPreference
+        android:key="foncolor"
+        android:title="@string/foncolor"
+        android:summary="@string/foncolorfull"
+        android:defaultValue="@integer/colordark"
+        android:dependency="checkcolor"
+    />
+
+    <!--PreferenceScreen        часть XML файла для второго варианта формирования меню
+        android:key="http"
+        android:title="@string/rate"
+        android:summary="@string/rate_full">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="http://play.google.com/store/apps/details?id=com.andrey.kostin.fastlight" />
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:key="market"
+        android:title="@string/rate"
+        android:summary="@string/rate_full">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="market://play.google.com/store/apps/details?id=com.andrey.kostin.fastlight" />
+    </PreferenceScreen-->
+
+</PreferenceScreen>

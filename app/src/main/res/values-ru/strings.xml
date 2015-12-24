@@ -13,4 +13,8 @@
     <string name="swscreen">Экран</string>
     <string name="check1title">Светить экраном</string>
     <string name="check1summary">Светить экраном вместо вспышки при старте приложения</string>
+    <string name="foncolor">Цвет фона</string>
+    <string name="foncolorfull">Выберите цвет фона</string>
+    <string name="customcolor">Свои цвета</string>
+    <string name="customcolorfull">Выбор своего цвета фона</string>
 </resources>

@@ -12,4 +12,8 @@
     <string name="swscreen">Screen</string>
     <string name="check1title">Light the screen</string>
     <string name="check1summary">Light the screen instead of flash at the startup</string>
+    <string name="foncolor">Background color</string>
+    <string name="foncolorfull">Choose a background color</string>
+    <string name="customcolor">Customize color</string>
+    <string name="customcolorfull">Customize the background color</string>
 </resources>
