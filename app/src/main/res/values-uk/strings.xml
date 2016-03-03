@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ліхтарик</string>
+    <string name="action_settings">Налаштування</string>
+    <string name="cameramiss">Шкодую, але не можу знайти спалах</string>
+    <string name="check1summary">На жаль не можу знайти спалах, буду використовувати світло від екрану</string>
+    <string name="check1title">Світити екраном</string>
+    <string name="close_app">Закрити програму</string>
+    <string name="customcolor">Налаштування кольору</string>
+    <string name="customcolorfull">Налаштування кольору фону</string>
+    <string name="foncolor">Колір фону</string>
+    <string name="foncolorfull">Виберіть колір фону</string>
+    <string name="rate">Оцініть програму</string>
+    <string name="rate_full">Будь ласка оціните цей ліхтарик на Google Play</string>
+    <string name="snacknotsupport">На жаль режим ліхтарика не підтримується</string>
+    <string name="swOFF">ЕКРАН</string>
+    <string name="swON">СПАЛАХ</string>
+    <string name="swscreen">Екран</string>
+    <string name="usescreen">На жаль не можу знайти спалах, буду використовувати світло від екрану</string>
+</resources>
